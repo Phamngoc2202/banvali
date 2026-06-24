@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
 import heroImage from './assets/anhNen.jpg';
 import logoImage from './assets/logo.png';
 
+/* ═══════════════════════════════════════════════════════
+   DATA
+   ═══════════════════════════════════════════════════════ */
 const navItems = [
   { label: 'Giới thiệu', href: '#gioi-thieu' },
   { label: 'Sản phẩm', href: '#san-pham' },
@@ -88,18 +91,21 @@ const products = [
     tone: 'Đen nhám',
     price: '2.490.000đ',
     accent: 'midnight',
+    placeholder: 'Ảnh vali đen',
   },
   {
     name: 'NOMA Sky Blue',
     tone: 'Xanh biển',
     price: '2.690.000đ',
     accent: 'sky',
+    placeholder: 'Ảnh vali xanh',
   },
   {
     name: 'NOMA Rose',
     tone: 'Hồng pastel',
     price: '2.590.000đ',
     accent: 'rose',
+    placeholder: 'Ảnh vali hồng',
   },
 ];
 
@@ -113,9 +119,9 @@ const productBenefits = [
 ];
 
 const stats = [
-  { value: '25.000+', label: 'Sản phẩm đã bán' },
-  { value: '98%', label: 'Khách hàng hài lòng' },
-  { value: '4.9/5', label: 'Tỷ lệ đánh giá tích cực' },
+  { value: 25000, suffix: '+', label: 'Sản phẩm đã bán' },
+  { value: 98, suffix: '%', label: 'Khách hàng hài lòng' },
+  { value: 4.9, suffix: '/5', label: 'Đánh giá tích cực', decimals: 1 },
 ];
 
 const testimonials = [
@@ -167,6 +173,9 @@ const faqs = [
   },
 ];
 
+/* ═══════════════════════════════════════════════════════
+   ICON COMPONENT
+   ═══════════════════════════════════════════════════════ */
 function Icon({ name }) {
   const icons = {
     plane: (
@@ -223,6 +232,12 @@ function Icon({ name }) {
     time: (
       <path d="M12 5v7l4 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
     ),
+    camera: (
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" />
+    ),
+    arrowUp: (
+      <path d="M12 19V5m-7 7 7-7 7 7" />
+    ),
   };
 
   return (
@@ -241,18 +256,191 @@ function Icon({ name }) {
   );
 }
 
-function App() {
-  const [menuOpen, setMenuOpen] = useState(false);
+/* ═══════════════════════════════════════════════════════
+   CUSTOM HOOKS
+   ═══════════════════════════════════════════════════════ */
 
-  const handleNavClick = () => {
-    setMenuOpen(false);
+/** Detects when an element enters the viewport */
+function useInView(options = {}) {
+  const ref = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          if (options.once !== false) {
+            observer.unobserve(element);
+          }
+        } else if (options.once === false) {
+          setIsVisible(false);
+        }
+      },
+      {
+        threshold: options.threshold || 0.15,
+        rootMargin: options.rootMargin || '0px 0px -60px 0px',
+      }
+    );
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [options.threshold, options.rootMargin, options.once]);
+
+  return [ref, isVisible];
+}
+
+/** Animated counter hook */
+function useCountUp(end, isVisible, duration = 2000, decimals = 0) {
+  const [count, setCount] = useState(0);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    if (!isVisible || hasAnimated.current) return;
+    hasAnimated.current = true;
+
+    let rAFId = null;
+    const startTime = performance.now();
+
+    function animate(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // ease-out-quart
+      const eased = 1 - Math.pow(1 - progress, 4);
+      const currentValue = eased * end;
+
+      setCount(decimals > 0 ? parseFloat(currentValue.toFixed(decimals)) : Math.floor(currentValue));
+
+      if (progress < 1) {
+        rAFId = requestAnimationFrame(animate);
+      }
+    }
+
+    rAFId = requestAnimationFrame(animate);
+    return () => {
+      if (rAFId) {
+        cancelAnimationFrame(rAFId);
+      }
+    };
+  }, [isVisible, end, duration, decimals]);
+
+  return count;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SUB-COMPONENTS
+   ═══════════════════════════════════════════════════════ */
+
+/** Scroll progress bar at the top of the page */
+function ScrollProgress() {
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      setWidth(docHeight > 0 ? (scrollTop / docHeight) * 100 : 0);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return <div className="scroll-progress" style={{ width: `${width}%` }} />;
+}
+
+/** Reveal wrapper — adds scroll-triggered fade animation */
+function Reveal({ children, className = '', direction = '', delay = 0 }) {
+  const [ref, isVisible] = useInView();
+
+  const dirClass = direction ? `reveal--${direction}` : '';
+
+  return (
+    <div
+      ref={ref}
+      className={`reveal ${dirClass} ${isVisible ? 'is-visible' : ''} ${className}`}
+      style={delay ? { transitionDelay: `${delay}ms` } : undefined}
+    >
+      {children}
+    </div>
+  );
+}
+
+/** Stat card with count-up animation */
+function StatCard({ value, suffix, label, decimals = 0 }) {
+  const [ref, isVisible] = useInView();
+  const count = useCountUp(value, isVisible, 2000, decimals);
+
+  return (
+    <article ref={ref} className="stat-card">
+      <strong>
+        {decimals > 0 ? count.toFixed(decimals) : count.toLocaleString()}
+        {suffix}
+      </strong>
+      <p>{label}</p>
+    </article>
+  );
+}
+
+/** Scroll-to-top button */
+function ScrollToTop() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setVisible(window.scrollY > 600);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
+    <button
+      className={`scroll-top ${visible ? 'is-visible' : ''}`}
+      onClick={scrollToTop}
+      aria-label="Lên đầu trang"
+    >
+      <Icon name="arrowUp" />
+    </button>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════
+   MAIN APP
+   ═══════════════════════════════════════════════════════ */
+function App() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  const handleNavClick = useCallback(() => {
+    setMenuOpen(false);
+  }, []);
+
+  // Header shrink on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
     <div className="page-shell">
-      <header className="site-header">
+      <ScrollProgress />
+
+      {/* ── HEADER ── */}
+      <header className={`site-header ${isScrolled ? 'is-scrolled' : ''}`}>
         <a className="brand" href="#gioi-thieu" onClick={handleNavClick}>
-          <img src={logoImage} alt="NOMA" />
+          <img src={logoImage} alt="NOMA Luggage" />
         </a>
 
         <button
@@ -260,7 +448,7 @@ function App() {
           className={`menu-toggle ${menuOpen ? 'is-open' : ''}`}
           aria-label="Mở menu"
           aria-expanded={menuOpen}
-          onClick={() => setMenuOpen((current) => !current)}
+          onClick={() => setMenuOpen((c) => !c)}
         >
           <span />
           <span />
@@ -287,11 +475,19 @@ function App() {
       </header>
 
       <main>
+        {/* ── HERO ── */}
         <section
           className="hero"
           id="gioi-thieu"
           style={{ '--hero-image': `url(${heroImage})` }}
         >
+          {/* Decorative circles */}
+          <div className="hero__decor" aria-hidden="true">
+            <div className="hero__decor-circle" />
+            <div className="hero__decor-circle" />
+            <div className="hero__decor-circle" />
+          </div>
+
           <div className="hero__inner section-container">
             <div className="hero__content">
               <div className="hero__badge">
@@ -346,285 +542,344 @@ function App() {
           </div>
         </section>
 
+        {/* ── SERVICE STRIP ── */}
         <section className="service-strip">
-          <div className="section-container service-strip__grid">
-            {serviceHighlights.map((item) => (
-              <article key={item.title} className="service-strip__item">
-                <span className="service-strip__icon">
-                  <Icon name={item.icon} />
-                </span>
-                <div>
-                  <strong>{item.title}</strong>
-                  <p>{item.text}</p>
-                </div>
-              </article>
+          <div className="section-container service-strip__grid stagger-children">
+            {serviceHighlights.map((item, i) => (
+              <Reveal key={item.title} delay={i * 80}>
+                <article className="service-strip__item">
+                  <span className="service-strip__icon">
+                    <Icon name={item.icon} />
+                  </span>
+                  <div>
+                    <strong>{item.title}</strong>
+                    <p>{item.text}</p>
+                  </div>
+                </article>
+              </Reveal>
             ))}
           </div>
         </section>
 
+        {/* ── WHY NOMA ── */}
         <section className="section section--light" id="uu-diem">
           <div className="section-container">
-            <div className="section-heading">
-              <p className="eyebrow">Tại sao chọn NOMA</p>
-              <h2>Tại Sao NOMA Là Người Bạn Đồng Hành Lý Tưởng?</h2>
-              <p>
-                Mọi chi tiết được tối ưu cho hành trình thực tế: nhẹ, bền, đẹp
-                và đủ an tâm để bạn tập trung tận hưởng chuyến đi.
-              </p>
-            </div>
-
-            <div className="feature-grid">
-              {whyFeatures.map((feature) => (
-                <article key={feature.title} className="feature-card">
-                  <span className="feature-card__icon">
-                    <Icon name={feature.icon} />
-                  </span>
-                  <h3>{feature.title}</h3>
-                  <p>{feature.text}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="section" id="san-pham">
-          <div className="section-container">
-            <div className="section-heading">
-              <p className="eyebrow">Bộ sưu tập NOMA</p>
-              <h2>Thiết kế hiện đại cho nhiều phong cách dịch chuyển</h2>
-              <p>
-                Từ gam màu tối thanh lịch đến tông pastel trẻ trung, NOMA giúp
-                bạn chọn đúng người bạn đồng hành cho từng hành trình.
-              </p>
-            </div>
-
-            <div className="product-grid">
-              {products.map((product) => (
-                <article
-                  key={product.name}
-                  className={`product-card product-card--${product.accent}`}
-                >
-                  <div
-                    className="product-card__image"
-                    style={{ '--product-image': `url(${heroImage})` }}
-                  >
-                    <span>{product.tone}</span>
-                  </div>
-                  <div className="product-card__body">
-                    <div>
-                      <h3>{product.name}</h3>
-                      <p>Kiểu dáng tối giản, phù hợp du lịch và công tác.</p>
-                    </div>
-                    <div className="product-card__footer">
-                      <strong>{product.price}</strong>
-                      <a href="#lien-he">Xem chi tiết</a>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="section section--contrast">
-          <div className="section-container">
-            <div className="section-heading section-heading--left">
-              <p className="eyebrow">Thiết kế cho mọi hành trình</p>
-              <h2>Những chi tiết nhỏ tạo nên trải nghiệm lớn</h2>
-            </div>
-
-            <div className="benefit-grid">
-              {productBenefits.map((item) => (
-                <article key={item.title} className="benefit-card">
-                  <span className="benefit-card__icon">
-                    <Icon name={item.icon} />
-                  </span>
-                  <h3>{item.title}</h3>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="section" id="trai-nghiem">
-          <div className="section-container experience-layout">
-            <div className="experience-copy">
-              <p className="eyebrow">Mang cả mùa hè theo bạn</p>
-              <h2>Trọn vẹn từ chuyến đi biển đến lịch trình khám phá thành phố</h2>
-              <p>
-                Từ những chuyến du lịch biển đến các hành trình khám phá thành
-                phố mới, NOMA luôn sẵn sàng đồng hành cùng bạn với thiết kế
-                tiện dụng và ngoại hình nổi bật.
-              </p>
-
-              <div className="stats-grid">
-                {stats.map((stat) => (
-                  <article key={stat.label} className="stat-card">
-                    <strong>{stat.value}</strong>
-                    <p>{stat.label}</p>
-                  </article>
-                ))}
-              </div>
-            </div>
-
-            <div
-              className="experience-visual"
-              style={{ '--experience-image': `url(${heroImage})` }}
-            >
-              <div className="experience-visual__panel">
-                <p>Ready for takeoff</p>
-                <strong>Nhẹ gọn, sang và linh hoạt trong mọi khung hình.</strong>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="section section--light" id="danh-gia">
-          <div className="section-container">
-            <div className="section-heading">
-              <p className="eyebrow">Khách hàng nói gì</p>
-              <h2>Đánh giá thực tế từ những người đã chọn NOMA</h2>
-            </div>
-
-            <div className="testimonial-grid">
-              {testimonials.map((item) => (
-                <article key={item.name} className="testimonial-card">
-                  <div className="testimonial-card__stars" aria-label="5 sao">
-                    <Icon name="star" />
-                    <Icon name="star" />
-                    <Icon name="star" />
-                    <Icon name="star" />
-                    <Icon name="star" />
-                  </div>
-                  <p>{item.review}</p>
-                  <div className="testimonial-card__author">
-                    <span>{item.name.slice(0, 1)}</span>
-                    <div>
-                      <strong>{item.name}</strong>
-                      <small>{item.role}</small>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="section" id="faq">
-          <div className="section-container faq-layout">
-            <div className="section-heading section-heading--left">
-              <p className="eyebrow">Câu hỏi thường gặp</p>
-              <h2>Giải đáp nhanh trước khi bạn chọn chiếc vali tiếp theo</h2>
-              <p>
-                Những thông tin quan trọng nhất về chất liệu, bảo hành và trải
-                nghiệm sử dụng được tổng hợp ngay tại đây.
-              </p>
-            </div>
-
-            <div className="faq-list">
-              {faqs.map((item) => (
-                <details key={item.question} className="faq-item">
-                  <summary>{item.question}</summary>
-                  <p>{item.answer}</p>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="section section--contrast" id="lien-he">
-          <div className="section-container contact-layout">
-            <div className="contact-copy">
-              <p className="eyebrow">Liên hệ với chúng tôi</p>
-              <h2>Sẵn sàng tư vấn để bạn chọn đúng mẫu NOMA phù hợp</h2>
-              <p>
-                Liên hệ với đội ngũ NOMA để nhận tư vấn nhanh về kích thước,
-                màu sắc, bảo hành và ưu đãi hiện có.
-              </p>
-
-              <div className="contact-list">
-                <article>
-                  <Icon name="phone" />
-                  <div>
-                    <strong>Hotline</strong>
-                    <p>1900 6868</p>
-                  </div>
-                </article>
-                <article>
-                  <Icon name="mail" />
-                  <div>
-                    <strong>Email</strong>
-                    <p>hello@nomaluggage.vn</p>
-                  </div>
-                </article>
-                <article>
-                  <Icon name="pin" />
-                  <div>
-                    <strong>Địa chỉ</strong>
-                    <p>88 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh</p>
-                  </div>
-                </article>
-                <article>
-                  <Icon name="time" />
-                  <div>
-                    <strong>Giờ làm việc</strong>
-                    <p>08:00 - 21:00 mỗi ngày</p>
-                  </div>
-                </article>
-              </div>
-            </div>
-
-            <form className="contact-form">
-              <label>
-                Họ và tên
-                <input type="text" placeholder="Nhập họ tên của bạn" />
-              </label>
-              <label>
-                Số điện thoại
-                <input type="tel" placeholder="Nhập số điện thoại" />
-              </label>
-              <label>
-                Email
-                <input type="email" placeholder="Nhập email" />
-              </label>
-              <label>
-                Nội dung
-                <textarea
-                  rows="5"
-                  placeholder="Bạn muốn được tư vấn về mẫu vali nào?"
-                />
-              </label>
-              <button className="button button--primary" type="submit">
-                Gửi yêu cầu
-              </button>
-            </form>
-          </div>
-        </section>
-
-        <section className="section">
-          <div className="section-container">
-            <div className="final-cta">
-              <div>
-                <p className="eyebrow">Sẵn sàng cho chuyến đi tiếp theo?</p>
-                <h2>Khám phá bộ sưu tập vali NOMA dành cho mùa hè năng động</h2>
+            <Reveal>
+              <div className="section-heading">
+                <p className="eyebrow">Tại sao chọn NOMA</p>
+                <hr className="section-divider" />
+                <h2>Tại Sao NOMA Là Người Bạn Đồng Hành Lý Tưởng?</h2>
                 <p>
-                  Lựa chọn người bạn đồng hành phù hợp cho từng hành trình và
-                  trải nghiệm cảm giác di chuyển nhẹ nhàng hơn mỗi ngày.
+                  Mọi chi tiết được tối ưu cho hành trình thực tế: nhẹ, bền, đẹp
+                  và đủ an tâm để bạn tập trung tận hưởng chuyến đi.
                 </p>
               </div>
-              <div className="final-cta__actions">
-                <a className="button button--primary" href="#lien-he">
-                  Mua ngay
-                </a>
-                <a className="button button--secondary" href="#san-pham">
-                  Xem bộ sưu tập
-                </a>
-              </div>
+            </Reveal>
+
+            <div className="feature-grid stagger-children">
+              {whyFeatures.map((feature, i) => (
+                <Reveal key={feature.title} delay={i * 100}>
+                  <article className="feature-card">
+                    <span className="feature-card__icon">
+                      <Icon name={feature.icon} />
+                    </span>
+                    <h3>{feature.title}</h3>
+                    <p>{feature.text}</p>
+                  </article>
+                </Reveal>
+              ))}
             </div>
+          </div>
+        </section>
+
+        {/* ── PRODUCTS ── */}
+        <section className="section" id="san-pham">
+          <div className="section-container">
+            <Reveal>
+              <div className="section-heading">
+                <p className="eyebrow">Bộ sưu tập NOMA</p>
+                <hr className="section-divider" />
+                <h2>Thiết kế hiện đại cho nhiều phong cách dịch chuyển</h2>
+                <p>
+                  Từ gam màu tối thanh lịch đến tông pastel trẻ trung, NOMA giúp
+                  bạn chọn đúng người bạn đồng hành cho từng hành trình.
+                </p>
+              </div>
+            </Reveal>
+
+            <div className="product-grid stagger-children">
+              {products.map((product, i) => (
+                <Reveal key={product.name} delay={i * 120}>
+                  <article
+                    className={`product-card product-card--${product.accent}`}
+                  >
+                    <div className="product-card__image">
+                      <div className="placeholder">
+                        <Icon name="camera" />
+                        <span>{product.placeholder}</span>
+                      </div>
+                      <span>{product.tone}</span>
+                    </div>
+                    <div className="product-card__body">
+                      <div>
+                        <h3>{product.name}</h3>
+                        <p>Kiểu dáng tối giản, phù hợp du lịch và công tác.</p>
+                      </div>
+                      <div className="product-card__footer">
+                        <strong>{product.price}</strong>
+                        <a href="#lien-he">Xem chi tiết</a>
+                      </div>
+                    </div>
+                  </article>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── PRODUCT BENEFITS ── */}
+        <section className="section section--gradient">
+          <div className="section-container">
+            <Reveal>
+              <div className="section-heading">
+                <p className="eyebrow">Thiết kế cho mọi hành trình</p>
+                <hr className="section-divider" />
+                <h2>Những chi tiết nhỏ tạo nên trải nghiệm lớn</h2>
+              </div>
+            </Reveal>
+
+            <div className="benefit-grid stagger-children">
+              {productBenefits.map((item, i) => (
+                <Reveal key={item.title} delay={i * 80}>
+                  <article className="benefit-card">
+                    <span className="benefit-card__icon">
+                      <Icon name={item.icon} />
+                    </span>
+                    <h3>{item.title}</h3>
+                  </article>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── EXPERIENCE ── */}
+        <section className="section" id="trai-nghiem">
+          <div className="section-container experience-layout">
+            <Reveal direction="left">
+              <div className="experience-copy">
+                <p className="eyebrow">Mang cả mùa hè theo bạn</p>
+                <h2>
+                  Trọn vẹn từ chuyến đi biển đến lịch trình khám phá thành phố
+                </h2>
+                <p>
+                  Từ những chuyến du lịch biển đến các hành trình khám phá thành
+                  phố mới, NOMA luôn sẵn sàng đồng hành cùng bạn với thiết kế
+                  tiện dụng và ngoại hình nổi bật.
+                </p>
+
+                <div className="stats-grid">
+                  {stats.map((stat) => (
+                    <StatCard
+                      key={stat.label}
+                      value={stat.value}
+                      suffix={stat.suffix}
+                      label={stat.label}
+                      decimals={stat.decimals}
+                    />
+                  ))}
+                </div>
+              </div>
+            </Reveal>
+
+            <Reveal direction="right">
+              <div className="experience-visual">
+                <div className="placeholder">
+                  <Icon name="camera" />
+                  <span>Ảnh lifestyle du lịch</span>
+                </div>
+                <div className="experience-visual__panel">
+                  <p>Ready for takeoff</p>
+                  <strong>
+                    Nhẹ gọn, sang và linh hoạt trong mọi khung hình.
+                  </strong>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ── TESTIMONIALS ── */}
+        <section className="section section--light" id="danh-gia">
+          <div className="section-container">
+            <Reveal>
+              <div className="section-heading">
+                <p className="eyebrow">Khách hàng nói gì</p>
+                <hr className="section-divider" />
+                <h2>Đánh giá thực tế từ những người đã chọn NOMA</h2>
+              </div>
+            </Reveal>
+
+            <div className="testimonial-grid stagger-children">
+              {testimonials.map((item, i) => (
+                <Reveal key={item.name} delay={i * 120}>
+                  <article className="testimonial-card">
+                    <div className="testimonial-card__stars" aria-label="5 sao">
+                      <Icon name="star" />
+                      <Icon name="star" />
+                      <Icon name="star" />
+                      <Icon name="star" />
+                      <Icon name="star" />
+                    </div>
+                    <p>{item.review}</p>
+                    <div className="testimonial-card__author">
+                      <div className="testimonial-card__avatar">
+                        <span>{item.name.slice(0, 1)}</span>
+                      </div>
+                      <div>
+                        <strong>{item.name}</strong>
+                        <small>{item.role}</small>
+                      </div>
+                    </div>
+                  </article>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── FAQ ── */}
+        <section className="section" id="faq">
+          <div className="section-container faq-layout">
+            <Reveal direction="left">
+              <div className="section-heading section-heading--left">
+                <p className="eyebrow">Câu hỏi thường gặp</p>
+                <hr className="section-divider" />
+                <h2>Giải đáp nhanh trước khi bạn chọn chiếc vali tiếp theo</h2>
+                <p>
+                  Những thông tin quan trọng nhất về chất liệu, bảo hành và trải
+                  nghiệm sử dụng được tổng hợp ngay tại đây.
+                </p>
+              </div>
+            </Reveal>
+
+            <Reveal direction="right">
+              <div className="faq-list">
+                {faqs.map((item) => (
+                  <details key={item.question} className="faq-item">
+                    <summary>{item.question}</summary>
+                    <div className="faq-answer">{item.answer}</div>
+                  </details>
+                ))}
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ── CONTACT ── */}
+        <section className="section section--gradient" id="lien-he">
+          <div className="section-container contact-layout">
+            <Reveal direction="left">
+              <div className="contact-copy">
+                <p className="eyebrow">Liên hệ với chúng tôi</p>
+                <h2>Sẵn sàng tư vấn để bạn chọn đúng mẫu NOMA phù hợp</h2>
+                <p>
+                  Liên hệ với đội ngũ NOMA để nhận tư vấn nhanh về kích thước,
+                  màu sắc, bảo hành và ưu đãi hiện có.
+                </p>
+
+                <div className="contact-list">
+                  <article>
+                    <Icon name="phone" />
+                    <div>
+                      <strong>Hotline</strong>
+                      <p>1900 6868</p>
+                    </div>
+                  </article>
+                  <article>
+                    <Icon name="mail" />
+                    <div>
+                      <strong>Email</strong>
+                      <p>hello@nomaluggage.vn</p>
+                    </div>
+                  </article>
+                  <article>
+                    <Icon name="pin" />
+                    <div>
+                      <strong>Địa chỉ</strong>
+                      <p>88 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh</p>
+                    </div>
+                  </article>
+                  <article>
+                    <Icon name="time" />
+                    <div>
+                      <strong>Giờ làm việc</strong>
+                      <p>08:00 – 21:00 mỗi ngày</p>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </Reveal>
+
+            <Reveal direction="right">
+              <form className="contact-form" onSubmit={(e) => e.preventDefault()}>
+                <label>
+                  Họ và tên
+                  <input type="text" placeholder="Nhập họ tên của bạn" />
+                </label>
+                <label>
+                  Số điện thoại
+                  <input type="tel" placeholder="Nhập số điện thoại" />
+                </label>
+                <label>
+                  Email
+                  <input type="email" placeholder="Nhập email" />
+                </label>
+                <label>
+                  Nội dung
+                  <textarea
+                    rows="4"
+                    placeholder="Bạn muốn được tư vấn về mẫu vali nào?"
+                  />
+                </label>
+                <button className="button button--primary" type="submit">
+                  Gửi yêu cầu
+                </button>
+              </form>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ── FINAL CTA ── */}
+        <section className="section">
+          <div className="section-container">
+            <Reveal direction="scale">
+              <div className="final-cta">
+                <div>
+                  <p className="eyebrow">Sẵn sàng cho chuyến đi tiếp theo?</p>
+                  <h2>
+                    Khám phá bộ sưu tập vali NOMA dành cho mùa hè năng động
+                  </h2>
+                  <p>
+                    Lựa chọn người bạn đồng hành phù hợp cho từng hành trình và
+                    trải nghiệm cảm giác di chuyển nhẹ nhàng hơn mỗi ngày.
+                  </p>
+                </div>
+                <div className="final-cta__actions">
+                  <a className="button button--white" href="#lien-he">
+                    Mua ngay
+                  </a>
+                  <a className="button button--secondary" href="#san-pham">
+                    Xem bộ sưu tập
+                  </a>
+                </div>
+              </div>
+            </Reveal>
           </div>
         </section>
       </main>
 
+      {/* ── FOOTER ── */}
       <footer className="site-footer">
         <div className="section-container footer-grid">
           <div>
@@ -637,7 +892,7 @@ function App() {
           <div>
             <h3>Chính sách</h3>
             <a href="#lien-he">Bảo hành chính hãng</a>
-            <a href="#lien-he">Đổi trả & hoàn tiền</a>
+            <a href="#lien-he">Đổi trả &amp; hoàn tiền</a>
             <a href="#lien-he">Vận chuyển toàn quốc</a>
             <a href="#lien-he">Điều khoản sử dụng</a>
           </div>
@@ -658,6 +913,8 @@ function App() {
           © NOMA Luggage. All Rights Reserved.
         </div>
       </footer>
+
+      <ScrollToTop />
     </div>
   );
 }
