@@ -1,0 +1,291 @@
+# LANDING PAGE STRUCTURE – NOMA LUGGAGE
+
+## HEADER / NAVIGATION
+
+Logo NOMA
+
+Menu:
+
+* Giới thiệu
+* Sản phẩm
+* Ưu điểm
+* Trải nghiệm
+* Đánh giá
+* FAQ
+* Liên hệ
+
+CTA Button:
+
+* Mua ngay
+
+---
+
+# SECTION 1 – HERO BANNER
+
+## Badge
+
+Đồng hành mọi hành trình
+
+## Main Heading
+
+Vi Vu Mùa Hè
+
+## Sub Heading
+
+Trọn Vẹn Trải Nghiệm
+
+## Description
+
+NOMA mang đến những chiếc vali bền bỉ, thời trang và tiện nghi, giúp mọi chuyến đi trở nên nhẹ nhàng và thoải mái hơn.
+
+## Key Benefits
+
+* Siêu nhẹ
+* Chống va đập
+* Bánh xe xoay 360°
+* Khóa bảo mật an toàn
+
+## CTA
+
+* Mua ngay
+* Khám phá bộ sưu tập
+
+## Trust Signals
+
+* Khách hàng đã mua
+* Đánh giá trung bình
+* Sản phẩm bán ra
+
+---
+
+# SECTION 2 – WHY NOMA
+
+## Section Title
+
+Tại Sao NOMA Là Người Bạn Đồng Hành Lý Tưởng?
+
+## Feature Cards
+
+### Lightweight Design
+
+Thiết kế tối ưu trọng lượng giúp di chuyển dễ dàng.
+
+### Premium Durability
+
+Chất liệu cao cấp chống va đập hiệu quả.
+
+### Smooth Mobility
+
+Hệ thống bánh xe xoay linh hoạt trên mọi địa hình.
+
+### Secure Protection
+
+Khóa bảo mật giúp bảo vệ hành lý an toàn.
+
+---
+
+# SECTION 3 – PRODUCT COLLECTION
+
+## Section Title
+
+Bộ Sưu Tập NOMA
+
+## Product Grid
+
+### NOMA Black
+
+Vali màu đen
+
+### NOMA Sky Blue
+
+Vali màu xanh biển
+
+### NOMA Pink
+
+Vali màu hồng
+
+Thông tin hiển thị:
+
+* Hình ảnh
+* Tên sản phẩm
+* Giá bán
+* Nút xem chi tiết
+
+---
+
+# SECTION 4 – PRODUCT BENEFITS
+
+## Section Title
+
+Thiết Kế Cho Mọi Hành Trình
+
+### Benefit 1
+
+Khóa TSA đạt chuẩn quốc tế
+
+### Benefit 2
+
+Ngăn chứa rộng rãi và khoa học
+
+### Benefit 3
+
+Bề mặt chống trầy xước
+
+### Benefit 4
+
+Tay kéo hợp kim chắc chắn
+
+### Benefit 5
+
+Bánh xe xoay 360° êm ái
+
+### Benefit 6
+
+Bảo hành chính hãng dài hạn
+
+---
+
+# SECTION 5 – TRAVEL EXPERIENCE
+
+## Section Title
+
+Mang Cả Mùa Hè Theo Bạn
+
+## Description
+
+Từ những chuyến du lịch biển đến các hành trình khám phá thành phố mới, NOMA luôn sẵn sàng đồng hành cùng bạn.
+
+## Highlight Statistics
+
+* Sản phẩm đã bán
+* Khách hàng hài lòng
+* Tỷ lệ đánh giá tích cực
+
+---
+
+# SECTION 6 – TESTIMONIALS
+
+## Section Title
+
+Khách Hàng Nói Gì Về NOMA
+
+### Review Card 1
+
+Nội dung đánh giá
+
+### Review Card 2
+
+Nội dung đánh giá
+
+### Review Card 3
+
+Nội dung đánh giá
+
+Thông tin hiển thị:
+
+* Avatar
+* Họ tên
+* Đánh giá sao
+
+---
+
+# SECTION 7 – FAQ
+
+## Section Title
+
+Câu Hỏi Thường Gặp
+
+### Câu hỏi 1
+
+Trả lời
+
+### Câu hỏi 2
+
+Trả lời
+
+### Câu hỏi 3
+
+Trả lời
+
+### Câu hỏi 4
+
+Trả lời
+
+### Câu hỏi 5
+
+Trả lời
+
+---
+
+# SECTION 8 – CONTACT
+
+## Section Title
+
+Liên Hệ Với Chúng Tôi
+
+## Contact Information
+
+* Hotline
+* Email
+* Địa chỉ
+* Giờ làm việc
+
+## Contact Form
+
+* Họ và tên
+* Số điện thoại
+* Email
+* Nội dung
+
+CTA:
+
+* Gửi yêu cầu
+
+---
+
+# SECTION 9 – FINAL CTA
+
+## Heading
+
+Sẵn Sàng Cho Chuyến Đi Tiếp Theo?
+
+## Description
+
+Khám phá bộ sưu tập vali NOMA và lựa chọn người bạn đồng hành phù hợp cho mọi hành trình.
+
+## CTA
+
+* Mua ngay
+* Xem bộ sưu tập
+
+---
+
+# FOOTER
+
+## Thông tin thương hiệu
+
+* Logo NOMA
+* Slogan
+
+## Chính sách
+
+* Chính sách bảo hành
+* Chính sách đổi trả
+* Chính sách vận chuyển
+* Điều khoản sử dụng
+
+## Kết nối
+
+* Facebook
+* Instagram
+* TikTok
+
+## Liên hệ
+
+* Hotline
+* Email
+* Địa chỉ
+
+## Copyright
+
+© NOMA Luggage. All Rights Reserved.
