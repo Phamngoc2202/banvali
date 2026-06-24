@@ -1,28 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* ── Color Palette ── */
-  --bg-page: #faf8f5;
+  /* ── Color Palette (Refreshing Summer Ocean Theme) ── */
+  --bg-page: #f0f7ff;
   --bg-card: #ffffff;
-  --bg-dark: #0a1628;
+  --bg-dark: #0a1e35;
   --bg-dark-card: rgba(255, 255, 255, 0.04);
 
-  --brand-gold: #c9a86c;
-  --brand-gold-light: #e8d5b0;
-  --brand-gold-dark: #a8884d;
-  --brand-navy: #0a1628;
-  --brand-navy-light: #1a2d4a;
-  --brand-accent: #2a7de1;
+  --brand-gold: #0ea5e9;
+  --brand-gold-light: #bae6fd;
+  --brand-gold-dark: #0284c7;
+  --brand-navy: #0a1e35;
+  --brand-navy-light: #173354;
+  --brand-accent: #06b6d4;
 
-  --text-primary: #0f1923;
-  --text-secondary: #5a6a7d;
+  --text-primary: #0f1a26;
+  --text-secondary: #4d647d;
   --text-muted: #8a97a8;
-  --text-on-dark: rgba(255, 255, 255, 0.92);
-  --text-on-dark-muted: rgba(255, 255, 255, 0.6);
+  --text-on-dark: rgba(255, 255, 255, 0.95);
+  --text-on-dark-muted: rgba(255, 255, 255, 0.65);
 
-  --border-light: rgba(10, 22, 40, 0.06);
-  --border-medium: rgba(10, 22, 40, 0.1);
-  --border-gold: rgba(201, 168, 108, 0.3);
+  --border-light: rgba(10, 30, 53, 0.06);
+  --border-medium: rgba(10, 30, 53, 0.1);
+  --border-gold: rgba(14, 165, 233, 0.25);
 
   /* ── Typography ── */
   --font-sans: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif;

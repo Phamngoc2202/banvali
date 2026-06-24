@@ -850,33 +850,7 @@ function App() {
           </div>
         </section>
 
-        {/* ── FINAL CTA ── */}
-        <section className="section">
-          <div className="section-container">
-            <Reveal direction="scale">
-              <div className="final-cta">
-                <div>
-                  <p className="eyebrow">Sẵn sàng cho chuyến đi tiếp theo?</p>
-                  <h2>
-                    Khám phá bộ sưu tập vali NOMA dành cho mùa hè năng động
-                  </h2>
-                  <p>
-                    Lựa chọn người bạn đồng hành phù hợp cho từng hành trình và
-                    trải nghiệm cảm giác di chuyển nhẹ nhàng hơn mỗi ngày.
-                  </p>
-                </div>
-                <div className="final-cta__actions">
-                  <a className="button button--white" href="#lien-he">
-                    Mua ngay
-                  </a>
-                  <a className="button button--secondary" href="#san-pham">
-                    Xem bộ sưu tập
-                  </a>
-                </div>
-              </div>
-            </Reveal>
-          </div>
-        </section>
+
       </main>
 
       {/* ── FOOTER ── */}
