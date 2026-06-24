@@ -2,6 +2,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
 import heroImage from './assets/anhNen.jpg';
 import logoImage from './assets/logo.png';
+import valiDenImage from './assets/valiDen.jpg';
+import valiXanhImage from './assets/valiXanhDuong.jpg';
+import valiHongImage from './assets/valiHong.jpg';
+import lifestyleImage from './assets/lifestyleDulich.png';
 
 /* ═══════════════════════════════════════════════════════
    DATA
@@ -92,6 +96,7 @@ const products = [
     price: '2.490.000đ',
     accent: 'midnight',
     placeholder: 'Ảnh vali đen',
+    image: valiDenImage,
   },
   {
     name: 'NOMA Sky Blue',
@@ -99,6 +104,7 @@ const products = [
     price: '2.690.000đ',
     accent: 'sky',
     placeholder: 'Ảnh vali xanh',
+    image: valiXanhImage,
   },
   {
     name: 'NOMA Rose',
@@ -106,6 +112,7 @@ const products = [
     price: '2.590.000đ',
     accent: 'rose',
     placeholder: 'Ảnh vali hồng',
+    image: valiHongImage,
   },
 ];
 
@@ -614,10 +621,14 @@ function App() {
                     className={`product-card product-card--${product.accent}`}
                   >
                     <div className="product-card__image">
-                      <div className="placeholder">
-                        <Icon name="camera" />
-                        <span>{product.placeholder}</span>
-                      </div>
+                      {product.image ? (
+                        <img src={product.image} alt={product.name} />
+                      ) : (
+                        <div className="placeholder">
+                          <Icon name="camera" />
+                          <span>{product.placeholder}</span>
+                        </div>
+                      )}
                       <span>{product.tone}</span>
                     </div>
                     <div className="product-card__body">
@@ -694,16 +705,14 @@ function App() {
 
             <Reveal direction="right">
               <div className="experience-visual">
-                <div className="placeholder">
-                  <Icon name="camera" />
-                  <span>Ảnh lifestyle du lịch</span>
-                </div>
-                <div className="experience-visual__panel">
-                  <p>Ready for takeoff</p>
-                  <strong>
-                    Nhẹ gọn, sang và linh hoạt trong mọi khung hình.
-                  </strong>
-                </div>
+                {lifestyleImage ? (
+                  <img src={lifestyleImage} alt="Lifestyle du lịch cùng vali NOMA" />
+                ) : (
+                  <div className="placeholder">
+                    <Icon name="camera" />
+                    <span>Ảnh lifestyle du lịch</span>
+                  </div>
+                )}
               </div>
             </Reveal>
           </div>
